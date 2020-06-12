@@ -17,11 +17,14 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -45,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private int currentImg = 0;
     private TextView imgCount;
     private List<String> imgUrl = new ArrayList<>();
+    private EditText et;
+    private CustomTextView specialTv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +59,28 @@ public class MainActivity extends AppCompatActivity {
         initTimeSelcet();
         initSpinSelect();
         initImageSelect();
+        initSpecialText();
+    }
+
+    private void initSpecialText() {
+        et = findViewById(R.id.et);
+        specialTv = findViewById(R.id.special_tv);
+        et.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                specialTv.setText(s.toString());
+            }
+        });
     }
 
     private void setAndroidNativeLightStatusBar(boolean dark) {
