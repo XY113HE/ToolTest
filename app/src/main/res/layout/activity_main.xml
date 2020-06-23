@@ -86,7 +86,7 @@
             android:id="@+id/special_tv"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:text=""
+            android:text="彩色背景"
             android:gravity="center_vertical"/>
     </LinearLayout>
 
@@ -95,4 +95,33 @@
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/pause_time_btn"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="20"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择地址："
+            android:layout_gravity="center_vertical"/>
+        <TextView
+            android:id="@+id/address_tv"
+            android:layout_width="match_parent"
+            android:gravity="center"
+            android:layout_height="match_parent"
+            android:text="选择地址👇"
+            android:layout_gravity="center_vertical"/>
+
+    </LinearLayout>
+    <com.freeme.tooltest.AddressSelector
+        android:id="@+id/address"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </com.freeme.tooltest.AddressSelector>
 </LinearLayout>

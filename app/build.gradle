@@ -35,4 +35,6 @@ dependencies {
     implementation 'com.contrarywind:Android-PickerView:3.2.7'
     //TedPermission
     implementation 'gun0912.ted:tedpermission:2.2.2'
+    implementation 'com.github.Blincheng:AddressSelector:v1.0.4'
+
 }

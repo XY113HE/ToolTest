@@ -1,6 +1,5 @@
 package com.freeme.tooltest;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,8 +21,8 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -33,6 +32,7 @@ import android.widget.Toast;
 import com.bigkoo.pickerview.TimePickerView;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
+import com.yiguo.adressselectorlib.CityInterface;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 public class MainActivity extends AppCompatActivity {
     private TimePickerView pvTime;
@@ -50,6 +51,13 @@ public class MainActivity extends AppCompatActivity {
     private List<String> imgUrl = new ArrayList<>();
     private EditText et;
     private CustomTextView specialTv;
+    private CustomCountDownTimer customCountDownTimer;
+    private Button pauseTimeBtn;
+    private boolean pauseTimeFlag = false;
+    private AddressSelector addressSelector;
+    private String[] citys = new String[3];
+    private TextView addressTv;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +68,116 @@ public class MainActivity extends AppCompatActivity {
         initSpinSelect();
         initImageSelect();
         initSpecialText();
+        initCountDownTimer();
+        initAddressSelect();
+    }
+
+    private void initAddressSelect() {
+        addressTv = findViewById(R.id.address_tv);
+        addressTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addressSelector.setVisibility(View.VISIBLE);
+            }
+        });
+
+        final ArrayList<CitysBean> beans1 = new ArrayList<>();
+        for (int i = 0; i < 33; i++){
+            CitysBean bean = new CitysBean("省"+i);
+            beans1.add(bean);
+        }
+        final ArrayList<CitysBean> beans2 = new ArrayList<>();
+        for (int i = 0; i < 10; i++){
+            CitysBean bean = new CitysBean("市"+i);
+            beans2.add(bean);
+        }
+        final ArrayList<CitysBean> beans3 = new ArrayList<>();
+        for (int i = 0; i < 12; i++){
+            CitysBean bean = new CitysBean("区"+i);
+            beans3.add(bean);
+        }
+        addressSelector = findViewById(R.id.address);
+        addressSelector.setTabAmount(3);
+        addressSelector.setTextSelectedColor(Color.BLACK);
+        addressSelector.setLineColor(Color.BLUE);
+        addressSelector.setTextEmptyColor(Color.GRAY);
+        addressSelector.setCities(beans1);
+        addressSelector.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void itemClick(AddressSelector addressSelector, CityInterface city, int tabPosition) {
+                switch (tabPosition){
+                    case 0:
+                        citys[0] = city.getCityName();
+                        addressSelector.setCities(beans2);
+                        break;
+                    case 1:
+                        citys[1] = city.getCityName();
+                        addressSelector.setCities(beans3);
+                        break;
+                    case 2:
+                        //TODO 设置选择的地址
+                        citys[2] = city.getCityName();
+                        StringBuilder sb = new StringBuilder(citys[0]).append(citys[1]).append(citys[2]);
+                        addressTv.setText(sb.toString());
+//                        Toast.makeText(MainActivity.this, sb.toString(), Toast.LENGTH_SHORT).show();
+                        addressSelector.setVisibility(View.GONE);
+                        break;
+                }
+            }
+        });
+
+        addressSelector.setOnTabSelectedListener(new AddressSelector.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(AddressSelector addressSelector, AddressSelector.Tab tab) {
+                switch (tab.getIndex()){
+                    case 0:
+                        citys[1] = "";
+                        citys[2] = "";
+                        addressSelector.setCities(beans1);
+                        break;
+                    case 1:
+                        citys[2] = "";
+                        addressSelector.setCities(beans2);
+                        break;
+                    case 2:
+                        break;
+                }
+            }
+
+            @Override
+            public void onTabReselected(AddressSelector addressSelector, AddressSelector.Tab tab) {
+
+            }
+        });
+    }
+
+    private void initCountDownTimer() {
+        pauseTimeBtn = findViewById(R.id.pause_time_btn);
+        customCountDownTimer = new CustomCountDownTimer(20000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                pauseTimeBtn.setText("" + (int) (millisUntilFinished / 1000));
+            }
+
+            @Override
+            public void onFinish(long millisUntilFinished) {
+                pauseTimeBtn.setText("Finish");
+            }
+        }.start();
+
+        pauseTimeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!pauseTimeFlag) {
+                    customCountDownTimer.stop();
+                } else {
+                    customCountDownTimer.start();
+                }
+                pauseTimeFlag = !pauseTimeFlag;
+            }
+
+
+        });
     }
 
     private void initSpecialText() {
@@ -139,11 +257,9 @@ public class MainActivity extends AppCompatActivity {
         String sdRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
         String result = sdRoot +
                 "/" + "CarProtect" + "/" + "Cache";
-        if (new File(result).exists() && new File(result).isDirectory())
-        {
+        if (new File(result).exists() && new File(result).isDirectory()) {
             return result;
-        }
-        else {
+        } else {
             return sdRoot;
         }
     }
@@ -158,9 +274,9 @@ public class MainActivity extends AppCompatActivity {
         img1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!imgHere[0]) {
+                if (!imgHere[0]) {
                     selectImg();
-                }else{
+                } else {
                     deleteImg(0);
                 }
             }
@@ -168,9 +284,9 @@ public class MainActivity extends AppCompatActivity {
         img2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!imgHere[1]) {
+                if (!imgHere[1]) {
                     selectImg();
-                }else{
+                } else {
                     deleteImg(1);
                 }
             }
@@ -178,9 +294,9 @@ public class MainActivity extends AppCompatActivity {
         img3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!imgHere[2]) {
+                if (!imgHere[2]) {
                     selectImg();
-                }else{
+                } else {
                     deleteImg(2);
                 }
             }
@@ -189,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void deleteImg(int i) {
         imgUrl.remove(i);
-        switch (imgUrl.size()){
+        switch (imgUrl.size()) {
             case 0:
                 img1.setImageResource(R.drawable.img_add);
                 img2.setImageResource(R.drawable.img_add);
@@ -197,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
                 img2.setVisibility(View.INVISIBLE);
                 img3.setVisibility(View.INVISIBLE);
                 currentImg = 0;
-                imgCount.setText(currentImg+" / 3");
+                imgCount.setText(currentImg + " / 3");
                 imgHere = new boolean[]{false, false, false};
                 break;
             case 1:
@@ -206,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
                 img2.setVisibility(View.VISIBLE);
                 img3.setVisibility(View.INVISIBLE);
                 currentImg = 1;
-                imgCount.setText(currentImg+" / 3");
+                imgCount.setText(currentImg + " / 3");
                 imgHere = new boolean[]{true, false, false};
                 Bitmap bitImage = BitmapFactory.decodeFile(imgUrl.get(0));
                 img1.setImageBitmap(bitImage);
@@ -215,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
                 img3.setImageResource(R.drawable.img_add);
                 img3.setVisibility(View.VISIBLE);
                 currentImg = 2;
-                imgCount.setText(currentImg+" / 3");
+                imgCount.setText(currentImg + " / 3");
                 imgHere = new boolean[]{true, true, false};
                 Bitmap bitImage1 = BitmapFactory.decodeFile(imgUrl.get(0));
                 img1.setImageBitmap(bitImage1);
@@ -246,7 +362,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initSpinSelect() {
-        final String[] list = new String[]{"请选择周期","身份证","学生证","军人证","工作证","其他"};
+        final String[] list = new String[]{"请选择周期", "身份证", "学生证", "军人证", "工作证", "其他"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.custom_spin, list);
         Spinner spinner = findViewById(R.id.spinner);
         spinner.setAdapter(adapter);
@@ -380,16 +496,16 @@ public class MainActivity extends AppCompatActivity {
             imgUrl.add(imagePath);
             Bitmap bitImage = BitmapFactory.decodeFile(imagePath);//格式化图片
             currentImg++;
-            imgCount.setText(currentImg+" / 3");
-            if(!imgHere[0]){
+            imgCount.setText(currentImg + " / 3");
+            if (!imgHere[0]) {
                 img1.setImageBitmap(bitImage);//为imageView设置图片
                 img2.setVisibility(View.VISIBLE);
                 imgHere[0] = true;
-            }else if(!imgHere[1]){
+            } else if (!imgHere[1]) {
                 img2.setImageBitmap(bitImage);//为imageView设置图片
                 img3.setVisibility(View.VISIBLE);
                 imgHere[1] = true;
-            }else{
+            } else {
                 img3.setImageBitmap(bitImage);//为imageView设置图片
                 imgHere[2] = true;
             }
@@ -416,6 +532,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * 利用反射获取状态栏高度
+     *
      * @return
      */
     public int getStatusBarHeight() {
@@ -428,7 +545,7 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
-    public void nextActivity(View view){
+    public void nextActivity(View view) {
         Intent intent = new Intent(MainActivity.this, SecondActivity.class);
         startActivity(intent);
     }
